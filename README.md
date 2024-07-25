@@ -94,7 +94,7 @@ I hope now you can see that probabilities (using the sigmoid function such that 
 
 We first started with applying a sigmoid function to a typical linear regression so that our output values represent reality by being bounded between 0 and 1. As it's challenging to interpret how a one-unit increase in XX would result in how many units increase in YY for a nonlinear function (i.e., the sigmoid function), we convert the function to logit or log odds, which is a linear function.
 
-Nonetheless, trying to understand how a one-unit increase in XX would result in how many logit increases in YY is still challenging for us humans, so we convert the logit to odds ratios.
+Nonetheless, trying to understand how a one-unit increase in *X* would result in how many logit increases in *Y* is still challenging for us humans, so we convert the logit to odds ratios.
 
 The process can be mathematically reverted as well to get the probabilities from odds ratios.
 
@@ -132,7 +132,37 @@ At the end, the probability that maximizes likelihood is also the same number th
 
 <img width="472" alt="Screen Shot 2024-07-25 at 12 51 55 PM" src="https://github.com/user-attachments/assets/9997a45a-804e-41dc-b5c9-32ca689abbfb">
 
-*Y*<sub>*i*</sub> is the observed outcome (1 for subscription, 0 for no subscription).
-*p* is the probability of subscribing.
-*L*(*Y*∣*p*) is the likelihood of observing the data given the probability *p*.
+* *Y*<sub>*i*</sub> is the observed outcome (1 for subscription, 0 for no subscription).
+* *p* is the probability of subscribing.
+* *L*(*Y*∣*p*) is the likelihood of observing the data given the probability *p*.
+
+
+## Maximum Likelihood Estimation (MLE) for Logistic Regression
+
+Now that you have learned about the concept of MLE, let’s see how we can apply the concept with logistic regression. Let’s take another look at the logistic regression equation that I introduced to you previously:
+
+<img width="321" alt="Screen Shot 2024-07-25 at 1 56 57 PM" src="https://github.com/user-attachments/assets/ede755ea-a32a-4449-aece-242a5bbba38c">
+
+Imagine that at first, we have a random set of coefficients B<sub>0</sub>0=−0.3 and  B<sub>1</sub>0 = 0.1 as discussed previously. When we plug in the values and each *X* into the equation above, we get the logit for every observation. Note that unlike the example above, where I simply said that the probability of an Asian customer subscribing to the streaming service is 0.8, in reality, each sample should have a different *X* (such as age) and therefore should have a different probability.
+
+For instance, say each customer has a different probability as shown in the data table below:
+
+<img width="530" alt="Screen Shot 2024-07-25 at 2 03 28 PM" src="https://github.com/user-attachments/assets/559dcb5f-6990-48d7-8d00-a33969d99a7c">
+
+In this table:
+* Age is the predictor variable *X*.
+* Subscription (Y) indicates whether the customer subscribed (1) or not (0).
+* Probability (P) is calculated using the logistic regression model with the initial coefficients B<sub>0</sub>0=−0.3 and  B<sub>1</sub>0 = 0.1
+
+You can calculate these probabilities using the logistic regression equation:
+
+<img width="212" alt="Screen Shot 2024-07-25 at 4 12 28 PM" src="https://github.com/user-attachments/assets/0e47ec08-6be1-4c4d-a31c-d5a7d5d63f0d">
+
+Using the above probabilities, we can calculate the log likelihood for the entire dataset using the formula below I mentioned previously: 
+
+<img width="460" alt="Screen Shot 2024-07-25 at 4 14 21 PM" src="https://github.com/user-attachments/assets/aca728b0-6f54-4e3e-865e-54166d2a580c">
+
+Plugging in the values in the dataset above, we would get the log likelihood about -28.29.
+
+
 
