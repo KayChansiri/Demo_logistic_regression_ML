@@ -164,5 +164,12 @@ Using the above probabilities, we can calculate the log likelihood for the entir
 
 Plugging in the values in the dataset above, we would get the log likelihood about -28.29.
 
+Just like in linear regression, one question to ask is which sets of beta coefficients would provide a higher likelihood of the data. The answer is pretty much the same. We try different sets of Betas and see which ones yield the highest log likelihood. However, unlike linear regressions where you are trying to find the best beta coefficients that yield the lowest SSE (Sum of Squared Errors), here you find the best coefficients that yield the highest log likelihood.
+
+The way we do this is called the logistic loss function, which basically refers to trying to find the set of coefficients in a model that can obtain the maximum likelihood estimates of the coefficients for the logistic regression model.
+
+
+<img width="711" alt="Screen Shot 2024-07-25 at 4 36 11 PM" src="https://github.com/user-attachments/assets/53162270-f189-4d35-95a6-50dcff2dcced">
+
 
 
