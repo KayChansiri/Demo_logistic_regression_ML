@@ -88,3 +88,51 @@ Note that when the coefficient is positive, we use e<sup>coefficient</sup> to ge
 In the real world, we tend to have more than one predictor. We can write the logit formula of logistic regression as:
 
 <img width="524" alt="Screen Shot 2024-07-25 at 10 24 18 AM" src="https://github.com/user-attachments/assets/dfbad6f9-9a24-48c7-93a3-ef20422ae7e6">
+
+
+I hope now you can see that probabilities (using the sigmoid function such that the output values are bounded between 0 and 1), logit (i.e., log odds), and odds ratios are three key terms used in logistic regression functions.
+
+We first started with applying a sigmoid function to a typical linear regression so that our output values represent reality by being bounded between 0 and 1. As it's challenging to interpret how a one-unit increase in XX would result in how many units increase in YY for a nonlinear function (i.e., the sigmoid function), we convert the function to logit or log odds, which is a linear function.
+
+Nonetheless, trying to understand how a one-unit increase in XX would result in how many logit increases in YY is still challenging for us humans, so we convert the logit to odds ratios.
+
+The process can be mathematically reverted as well to get the probabilities from odds ratios.
+
+## The Concept of Likelihood 
+
+In my previous post about linear regression, I showed you a visualization of how a software program that you use to run regression comes up with a set of beta coefficients (e.g., by relying on matrix operations or gradient descent boosting). For logistic regression, things work a bit differently. To get the best set of regression coefficients, we use the concept of likelihood. Let’s try to understand the basic idea of this concept first.
+
+Say you work for a streaming service company based in Northern Virginia, where the Asian population is on the rise, and you assume that the probability of Asian customers subscribing to a new streaming service from Korea should be quite high, around 0.8. In other words, we can say *p* = 0.8, meaning that there is an 80% chance that a customer would subscribe to the service. Then you look at the actual data and observe that at least 7 out of 10 customers subscribe to the streaming service. This observed data could be represented by the vector below:
+
+Y=(H,H,H,T,H,H,H,T,H,T)
+
+According to the vector, H=subscription, and T =no subscriptionT=no subscription. Now, when plugging the 0.8 probability into the vector, you would get the following likelihood:
+
+*L*(*Y*∣*p*=0.8) = 0.8×0.8×0.8×(1−0.8)×0.8×0.8×0.8×(1−0.8)×0.8×(1−0.8) ≈ 0.001677
+
+Thus, the likelihood of observing the data given that the probability of subscription is 0.8 is approximately 0.001677. In other words, we can say that if we assume that the probability is 0.8, the likelihood of observing the outcome in our dataset (7 subscriptions and 3 no subscriptions) is 0.001677.
+
+If you think that the probability of an Asian customer subscribing to the streaming service might be a bit lower, like about 0.5 due to the economic recession, the likelihood would be:
+
+*L*(*Y*∣*p*=0.5)=0.5×0.5×0.5×(1−0.5)×0.5×0.5×0.5×(1−0.5)×0.5×(1−0.5) = 0.0009765625
+
+According to the two likelihood estimations above, we can say that an estimate of *p* being equal to 0.8 (likelihood = 0.001677) is more likely than an estimate of *p* being equal to 0.5 (likelihood = 0.0009765625). In other words, our observation of 7 subscriptions and 3 no-subscriptions is more likely if we estimate *p* as 0.8 rather than 0.5.
+
+## Maximum Likelihood Estimation (MLE)
+
+Now you may have a question regarding which *p* you should use such that you get the highest likelihood that best reflects the actual observed data (7 subscriptions and 3 no-subscriptions). The answer is you can try different values of *p* from 0 to 1 and see which one yields the highest likelihood as seen in the plot below:
+
+<img width="925" alt="Screen Shot 2024-07-25 at 12 46 12 PM" src="https://github.com/user-attachments/assets/6d767a44-489c-4eb5-a3eb-7aa8911e411d">
+
+In the plot, the x-axis represents the probability of observing a subscription (H), and the y-axis indicates the likelihood of observing 7 subscriptions (H) and 3 no-subscriptions (T). The peak probability value here, about 0.7, yields the highest likelihood (i.e., about 0.0022) of observing 7 subscriptions and 3 no-subscriptions. Therefore, the maximum likelihood estimate of the probability of observing a subscription for this particular dataset is 0.7 given the 10 observations we have made.
+
+Note that the concept of likelihood I mentioned above should work fine if you have only 10 observations. However, in the real world, you tend to have many more observations, like thousands to millions. Keeping multiplying *p* for each participant together could lead to high computational complexity. This is where the concept of log likelihood could be helpful.
+
+At the end, the probability that maximizes likelihood is also the same number that maximizes the log likelihood. Thus, it does not matter that much if we use log likelihood instead of likelihood. The formula of log likelihood based on the concept of likelihood is below:
+
+<img width="472" alt="Screen Shot 2024-07-25 at 12 51 55 PM" src="https://github.com/user-attachments/assets/9997a45a-804e-41dc-b5c9-32ca689abbfb">
+
+*Y*<sub>*i*</sub> is the observed outcome (1 for subscription, 0 for no subscription).
+*p* is the probability of subscribing.
+*L*(*Y*∣*p*) is the likelihood of observing the data given the probability *p*.
+
