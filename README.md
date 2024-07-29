@@ -4,13 +4,13 @@ In my previous post, I discussed linear regression from a machine learning (ML) 
 
 ## Why Logistic Regression?
 
-If you're like me, the first time you learn about logistic regression, you may wonder, "Why can’t we use linear regression to predict a binary outcome (e.g., 0, 1 or True, False)?" The answer lies in the limitations of linear regression for binary outcomes. Linear regression predictions can extend beyond the [0, 1] range, leading to unreasonable interpretations when our target outcome is strictly within this boundary. Thus, using an alternative model that works well with binary decisions is better. Logistic regression, which uses the sigmoid function, is the answer.
+If you're like me, the first time you learn about logistic regression, you may wonder, "Why can’t we use linear regression to predict a binary outcome (e.g., outcomes of which levels are 0 or 1, "True" or "False", etc.)?" The answer lies in the limitations of linear regression for binary outcomes. Linear regression predictions can extend beyond the [0, 1] range, leading to unreasonable interpretations when our target outcome is strictly within this boundary. Thus, using an alternative model that works well with binary decisions is better. Logistic regression, which uses the sigmoid function, is the answer.
 
 Before we get to the sigmoid function, there are three key terms you should familiarize yourself with in logistic regression: probability, odds, and logit: 
 
 * **Probability** refers to the chance of an event occurring, ranging from 0 to 1, and can be interpreted as a percentage. For example, if the probability of a customer subscribing to a new streaming service is 0.6, it means there is a 60% chance the customer will subscribe.
 * **Odds** are calculated by dividing the probability of an event occurring by the probability of it not occurring.
-* **Logit** is the natural logarithm of the odds. See below.
+* **Logit** is the natural logarithm of the odds. The term is also referred to as log odds. See below.
 
 
 <img width="601" alt="Screen Shot 2024-07-10 at 3 19 09 PM" src="https://github.com/KayChansiri/Demo_logistic_regression_ML/assets/157029107/b69425ca-1c16-40f5-94fd-858ac388df1b">
@@ -20,7 +20,7 @@ Mathematically, you can convert logit back to odds by applying the exponential f
 <img width="477" alt="Screen Shot 2024-07-25 at 8 49 48 AM" src="https://github.com/user-attachments/assets/543c3f45-9923-43dc-8f20-c0a06b9d3e6f">
 
 
-I know these concepts might sound confusing at first, but bear with me. I promise that by the end of this post, you'll have a clearer understanding. Let’s get back to the question I asked previously: why do we use the sigmoid function and why logistic regression for  binary outcomes? 
+I know these concepts might sound confusing at first, but bear with me. I promise that by the end of this post, you'll have a  better understanding. Let’s get back to the question I asked previously: why do we use the sigmoid function and why logistic regression for  binary outcomes? 
 
 ## Sigmoid Function
 
@@ -52,7 +52,6 @@ Now, plug this value into the sigmoid function:
 
 You will get P(*y*=1) ≈ 0.3775. So, the probability of the customer subscribing to the streaming service is approximately 37.75%.
 
-Sure, here is your text with the requested plot:
 
 Now imagine doing this with all customers in the dataset. You will get a plot like the one below:
 
@@ -68,34 +67,29 @@ The logit function does the opposite: it takes a probability (a number between 0
 
 <img width="198" alt="Screen Shot 2024-07-25 at 9 42 39 AM" src="https://github.com/user-attachments/assets/8687d9cb-20c1-4aa7-941d-c81944da985c">
 
-Remember I said earlie that X can be represented by your typical linear regresion function. Thus, converting a sigmoid function to logit for an easier interpretation of the output results in the following equation: 
+Remember I said earlie that *X* can be represented by your typical linear regresion function. Thus, converting a sigmoid function to logit for an easier interpretation of the output results in the following equation: 
 
 <img width="281" alt="Screen Shot 2024-07-25 at 9 45 04 AM" src="https://github.com/user-attachments/assets/1477c19e-e560-4b1a-9a96-e95f40129563">
 
-By converting the probability to the log-odds, we transform the nonlinear relationship into a linear one, making it easier to interpret. The coefficients in the logit model tell us how a one-unit change in a predictor affects the log-odds (i.e., logit) of the outcome.
+By converting the probability to the logit (i.e.,log-odds), we transform the nonlinear relationship into a linear one, making it easier to interpret. The coefficients in the logit model tell us how a one-unit change in a predictor affects the log-odds (i.e., logit) of the outcome.
 
 Even though we solve the linear interpretation problem, trying to understand what ‘one unit increase in logit’ means exactly is still challenging. Thus, we often convert regression coefficients to something easier for interpretation, like odds ratios. This can be done easily by exponentiating the coefficient.
 
-For instance, according to the age and customers' subscription I mentioned previously (the interpet = -3 and the slope = 0.1), we can say that when age is equal to zero, the odds of subscribing to the service is e<sup>-3</sup> ≈ 0.05. For every additional year of age, the odds of subscription increase by approximately e<sup>0.1</sup> ≈ 1.105, which means the odds are multiplied by 1.105, or increased by about 10.5%. 
+For instance, according to the age and customers' subscription example I mentioned previously (the intercept = -3 and the slope = 0.1), we can say that when age is equal to zero, the odds of subscribing to the service is e<sup>-3</sup> ≈ 0.05. For every additional year of age, the odds of subscription increase by approximately e<sup>0.1</sup> ≈ 1.105, which means the odds are multiplied by 1.105, or increased by about 10.5%. 
 Putting it together, when combining both the intercept and the coefficient for customer A who is 25 years old, x=−3+0.1⋅25=−0.5. The probability of subscription is: 
 
 <img width="227" alt="Screen Shot 2024-07-25 at 10 22 19 AM" src="https://github.com/user-attachments/assets/77120fc8-57ad-4b85-81ff-c069f49af055">
 
 The odds of subscribing to the service when the customer is 25 years old are e<sup>-0.5</sup> ≈ 0.607..
 
-Note that when the coefficient is positive, we use e<sup>coefficient</sup> to get the odds ratio, and the output will be more than 1. When the coefficient is negative, e<sup>coefficient</sup>still gives us the odds ratio, but it indicates a decrease in odds as the output will be less than 1.
+**Note that when the coefficient is positive, we use e<sup>coefficient</sup> to get the odds ratio, and the output will be more than 1. When the coefficient is negative, e<sup>coefficient</sup>still gives us the odds ratio, but it indicates a decrease in odds as the output will be less than 1.**
 
 In the real world, we tend to have more than one predictor. We can write the logit formula of logistic regression as:
 
 <img width="524" alt="Screen Shot 2024-07-25 at 10 24 18 AM" src="https://github.com/user-attachments/assets/dfbad6f9-9a24-48c7-93a3-ef20422ae7e6">
 
 
-I hope now you can see that probabilities (using the sigmoid function such that the output values are bounded between 0 and 1), logit (i.e., log odds), and odds ratios are three key terms used in logistic regression functions.
-
-We first started with applying a sigmoid function to a typical linear regression so that our output values represent reality by being bounded between 0 and 1. As it's challenging to interpret how a one-unit increase in XX would result in how many units increase in YY for a nonlinear function (i.e., the sigmoid function), we convert the function to logit or log odds, which is a linear function.
-
-Nonetheless, trying to understand how a one-unit increase in *X* would result in how many logit increases in *Y* is still challenging for us humans, so we convert the logit to odds ratios.
-
+I hope now you can see that how are probabilities (using the sigmoid function such that the output values are bounded between 0 and 1), logit (i.e., log odds), and odds ratios used in logistic regression functions. In conclusion, we first started with applying a sigmoid function to a typical linear regression so that our output values represent reality by being bounded between 0 and 1. As it's challenging to interpret how a one-unit increase in *X* would result in how many units increase in *Y* for a nonlinear function (i.e., the sigmoid function), we convert the function to logit or log odds, which is a linear function. Nonetheless, trying to understand how a one-unit increase in *X* would result in how many logit increases in *Y* is still challenging for us humans, so we convert the logit to odds ratios.
 The process can be mathematically reverted as well to get the probabilities from odds ratios.
 
 ## The Concept of Likelihood 
@@ -106,7 +100,7 @@ Say you work for a streaming service company based in Northern Virginia, where t
 
 Y=(H,H,H,T,H,H,H,T,H,T)
 
-According to the vector, H=subscription, and T =no subscriptionT=no subscription. Now, when plugging the 0.8 probability into the vector, you would get the following likelihood:
+According to the vector, H=subscription, and T =no subscription. Now, when plugging the 0.8 probability into the vector, you would get the following likelihood:
 
 *L*(*Y*∣*p*=0.8) = 0.8×0.8×0.8×(1−0.8)×0.8×0.8×0.8×(1−0.8)×0.8×(1−0.8) ≈ 0.001677
 
@@ -171,5 +165,36 @@ The way we do this is called the logistic loss function, which basically refers 
 
 <img width="711" alt="Screen Shot 2024-07-25 at 4 36 11 PM" src="https://github.com/user-attachments/assets/53162270-f189-4d35-95a6-50dcff2dcced">
 
+## Regularization and Evaluation Metrics in Logistic Regression
 
+The way that regularization works for logistic regression is quite similar to how it works in linear regression, which involves adding penalty terms to the loss function to avoid large coefficients. We have different types of regularization, including ridge, lasso, and elastic net. You may refer to my [previous post](https://github.com/KayChansiri/Demo_Linear_Regression_ML) to read more about regularization techniques in regression functions.
+
+Although logistic and linear regression share a similar regularization process, the evaluation metrics are different and emphasize accuracy, precision, recall, F1 scores, and the area under the curve (AUC). Read more in [the post](https://github.com/KayChansiri/Demo_Performance_Metrics) I wrote previously regarding evaluation metrics for binary outcomes. 
+
+## Class Imbalance
+
+In the real world, we do not always have projects where the outcome is balanced between the two categories. For example, consider fraud detection in banking; the percentage of fraudulent transactions is likely much lower than non-fraudulent transactions. The imbalance of the target outcome classes can influence the model performance. I wrote a post about which metrics are better when we have class imbalance [here](https://github.com/KayChansiri/Demo_Performance_Metrics). In addition to selecting the right metric to evaluate model performance, there are some strategies that could help to boost the performance of logistic regression when dealing with class imbalance.
+
+### 1. SMOTE (Synthetic Minority Over-sampling Technique)
+* **What it is**: SMOTE is a technique used to generate synthetic samples for the minority class to balance the class distribution.
+* **When to use it**: Use SMOTE when you have a significant class imbalance and need to improve the performance of your model by creating a more balanced dataset.
+* **When not to use it**: Avoid using SMOTE if the minority class has very few instances, as the synthetic samples might not represent the actual data distribution well. From my personal experience, if the ratio of your majority: minority class is less than 100:1, most of the times, SMOTE will not work well.
+
+### 2. Undersampling the Majority Class
+* **What it is**: Undersampling involves reducing the number of instances in the majority class to balance the dataset.
+* **When to use it**: Use undersampling when you have a large dataset and can afford to lose some majority class instances without significantly impacting the model's ability to learn. However, make sure that your majority instances follow a normal distribution. Otherwise, you may have a biased sample when you perform the undersampling technique, although you can write a function to randomly select majority class instances to represent the distribution of their population pool.
+* **When not to use it**: Be cautious when the class distribution ratio is crucial to the problem at hand. For example, in fraud detection, if fraudulent transactions (coded as 1) make up only 5% of the dataset, undersampling the majority class (non-fraudulent transactions coded as 0) to make a 1:1 ratio does not reflect the real-world distribution and could influence the validity of your project findings.
+
+### 3. Weight Adjustment
+* **What it is**: Adjusting the weights involves assigning more weight to the minority class during model training to penalize misclassifications of the minority class more heavily.
+* **When to use it**: Use weight adjustment when you want to give more importance to the minority class without altering the dataset.
+* **When not to use it**: Avoid using weight adjustment if the model already handles class imbalance well, as it might lead to overfitting.
+
+### 4. Other Techniques
+* There are other techniques to address class imbalance, such as using different algorithms that are robust to class imbalance, employing ensemble methods (e.g., random forest), or leveraging anomaly detection techniques. Each method has its advantages and should be considered based on the specific context of the problem.
+
+
+
+## Example 
+Now that 
 
