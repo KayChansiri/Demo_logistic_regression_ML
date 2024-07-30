@@ -564,12 +564,194 @@ print(classification_report(y_test, y_pred_under))
 print("AUC:", roc_auc_score(y_test, y_pred_under))
 ```
 The output:
+
 <img width="473" alt="Screen Shot 2024-07-30 at 10 56 28 AM" src="https://github.com/user-attachments/assets/57a6e2b5-3c16-4913-a13e-5d4f409c0971">
 
 The undersampling approach (0.83:1 ratio) achieves a better recall for the minority class (56%) compared to the baseline and SMOTE models. However, the recall rate is lower than that of the class weight adjustment model. The precision (7%) is also low, but since this metric is not of the company's primary interest, we will ignore it for now. The AUC of 67% indicates that the model has a reasonable discriminative ability, but there is room for improvement.
 
 Among all the methods I have tried, the class weight adjustment is the best at achieving the highest recall. Thus, we will proceed with using this method for the next step: regularization.
 
+### Regularization 
+
+**1. Lasso regression** 
+If you are not familiar with different types of regularization, refer back to my [previous post](https://github.com/KayChansiri/Demo_Linear_Regression_ML). The first method that I use here is lasso, which forces certain high coefficients to be exactly zero. In the code below, I use lasso, along with class weight adjustment to deal with class imbalance. I also use cross-validation with five folds. In each fold, the model tests multiple values of C (inverse of lambda) to find the best regularization strength. The Cs=10 parameter in the code below means 10 different values of C are tested for each cross-validation, and the same set of 10 C values is tested across all folds. By setting Cs=10, the algorithm will automatically select 10 values for C logarithmically spaced between a very small value (like 1e−4) and a very large value (like 1e4 or higher). You can also customize the values for C instead of using the default logarithmic spacing by using the code:
+
+```ruby
+custom_C_values = [0.01, 0.1, 1, 10, 100, 1000, 10000]
+
+```
+
+However, for the current project, I will let the algorithm automatically set the values. When you set Cs=10 and cv=5, the model will perform a total of 50 iterations. The best C value from cross-validation is then used to retrain the model on the entire training set. This final model, with the best lambda applied, is then used to make predictions on the testing set. See the code below for the full process. Note that if you want to see the paramaters across the CV folds, you can use the GridSearchCV() function instead of the current function that I use. 
+
+
+```ruby
+from sklearn.linear_model import LogisticRegressionCV
+
+# Perform cross-validation to find the best alpha using LogisticRegressionCV
+log_reg_cv = LogisticRegressionCV(
+    Cs=10,  # Number of values for C (i.e., 1/lambda) to try (default 10)
+    cv=5,  # Number of cross-validation folds
+    penalty='l1',  # Lasso (L1) regularization
+    solver='liblinear',  # Solver that supports L1 regularization
+    class_weight='balanced',
+    max_iter=10000,
+    random_state=42
+)
+log_reg_cv.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred_cv = log_reg_cv.predict(X_test)
+print("Lasso Regularized Logistic Regression with Class Weight Adjustment and Cross-Validation")
+print(classification_report(y_test, y_pred_cv, zero_division=0))
+print("AUC:", roc_auc_score(y_test, y_pred_cv))
+
+# Best parameter found by cross-validation
+print("Best C (inverse of regularization strength):", log_reg_cv.C_)
+```
+
+Note that I set the solver, which specifies the algorithm used to optimize the logistic regression, to 'liblinear'. This method is efficient for smaller datasets and when you specifically need L1 regularization. You can change the method to 'saga' if you have a larger dataset. The method is also appropriate for sparse data. Both 'saga' and 'liblinear' support ridge and lasso regularization. Other methods also exist, such as 'sag' (Stochastic Average Gradient Descent), which supports only L2 (Ridge) regularization and is suitable for large datasets with dense features, and 'lbfgs' and 'newton-cg', which support only L2 (Ridge) regularization and are suitable for smaller datasets and multinomial loss for multiclass classification.
+
+Here is the output using liblinear:
+
+
+<img width="737" alt="Screen Shot 2024-07-30 at 5 33 00 PM" src="https://github.com/user-attachments/assets/63f097e6-abb1-4cc1-8618-efe2f9337675">
+
+The output shows quite promising results in terms of recall for the minority class (subscribers). The model achieved a recall of 0.73 for the minority class, meaning it correctly identified 73% of actual subscribers. This matches the company goal as they want detect as many true positives as possible. However, the precision for the minority class is low at 0.08, indicating that among the predicted subscribers, only 8% were actual subscribers. The AUC score of 0.745 suggests a moderate ability to distinguish between subscribers and non-subscribers. The best regularization strength parameter (C) found through cross-validation is approximately 21.54, optimizing the balance between bias and variance in the model. Now let's take a look at feature importance:
+
+```ruby
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+# Get the coefficients of the model
+coefficients = log_reg_cv.coef_.flatten()  # Flatten to ensure that the coefficients array is one-dimensional
+
+# Create a DataFrame for feature importance
+feature_importance = pd.DataFrame({
+    'Feature': X_train.columns,
+    'Importance': coefficients
+})
+
+# Sort by absolute importance
+feature_importance['Absolute Importance'] = feature_importance['Importance'].abs()
+feature_importance = feature_importance.sort_values(by='Absolute Importance', ascending=False)
+
+print("Feature Importance:")
+print(feature_importance[['Feature', 'Importance']])
+
+# Plotting the feature importance
+plt.figure(figsize=(10, 6))
+plt.barh(feature_importance['Feature'], feature_importance['Importance'], color='skyblue')
+plt.xlabel('Coefficient Value')
+plt.ylabel('Feature')
+plt.title('Feature Importance')
+plt.gca().invert_yaxis()  # Invert y-axis to have the highest importance at the top
+plt.show()
+
+```
+
+The output: 
+
+<img width="1079" alt="Screen Shot 2024-07-30 at 7 07 08 PM" src="https://github.com/user-attachments/assets/fe7c8526-34da-44b5-9f2d-4753130ce510">
+
+
+The output indicates that the most significant predictors of the subscription status are 'other_activity', with the highest positive coefficient (1.127), indicating a strong positive influence, followed by 'race_asian' (0.742), and 'login_activity' (0.636). 'Customer_service_activity' (0.473) and 'unsubscribe_reason_email' (0.433) also both contribute positively, while 'unsubscribe_reason_login' (-0.430) and 'app_update_activity' (-0.412) show significant negative influences. The results highlight that specific user activities and demographic factors play crucial roles in predicting subscription status. 
+
+**2.Ridge regression**
+
+Now, let's take a look at ridge regression with the weight class adjustment.
+
+```ruby
+#2. Ridge regression with weight class adjustment 
+
+log_reg_cv = LogisticRegressionCV(
+    Cs=10,  # Number of values for C (i.e., 1/lambda) to try (default 10)
+    cv=5,  # Number of cross-validation folds
+    penalty='l2',  # Ridge (L2) regularization
+    solver='liblinear',  # Solver that supports L1 and L2 regularization
+    class_weight='balanced',
+    max_iter=10000,
+    random_state=42
+)
+log_reg_cv.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred_cv = log_reg_cv.predict(X_test)
+print("Ridge Regularized Logistic Regression with Class Weight Adjustment and Cross-Validation")
+print(classification_report(y_test, y_pred_cv, zero_division=0))
+print("AUC:", roc_auc_score(y_test, y_pred_cv))
+
+# Best parameter found by cross-validation
+print("Best C (inverse of regularization strength):", log_reg_cv.C_)
+```
+
+The output: 
+
+<img width="742" alt="Screen Shot 2024-07-30 at 7 15 25 PM" src="https://github.com/user-attachments/assets/1ca7972b-f0ff-4193-8bd3-e4df3d033621">
+
+According to the output, the ridge model show a high recall for the minority class (subscribers) at 0.85, indicating that the model successfully identifies 85% of actual subscribers. However, the model shows a very low precision (0.03), indicating that only 3% of predicted subscribers are actual subscribers. The overall accuracy of the model is only 0.27, and the AUC score is 0.557, suggesting limited discriminative ability between classes. On the other hand, the Lasso model that I ran previously balances both precision and recall more effectively, demonstrating a precision of 0.08 and a recall of 0.73 for the minority class. Its overall accuracy is much higher at 0.76, with an AUC of 0.745. In other words, the lasso model has a better overall performance in distinguishing between subscribers and non-subscribers. 
+
+You may wonder why the performance evaluation metrics change significantly when we change the regularization technique. The answer is lasso tends to produce sparser models (i.e., forcing certain coefficients to be exactly zero) and focuses on the most relevant features, which can enhance precision. Ridge includes all features, potentially introducing more noise and reducing precision. Besides, notice that the best C value (1/lambda) for the ridge model was very small (0.0001), suggesting strong regularization. This might have over-penalized the coefficients and reduced the model’s discriminative power. The best C value for lasso regression was much larger (21.54) (i.e., lower lambda), indicating less aggressive regularization. This may allow the model to retain important features while setting less important ones to zero, improving precision. 
+
+In conclusion, changing the regularization method affects certain matrics such as the precision rate because each method handles the coefficients differently, influencing how the model discriminates between classes. 
+
+Let's look at feature importance of the ridge regression: 
+
+```ruby
+# Feature importance
+
+# Get the coefficients of the model
+coefficients = log_reg_cv.coef_.flatten()  # Flatten to ensure that the coefficients array is one-dimensional
+
+# Create a DataFrame for feature importance
+feature_importance = pd.DataFrame({
+    'Feature': X_train.columns,
+    'Importance': coefficients
+})
+
+# Sort by absolute importance
+feature_importance['Absolute Importance'] = feature_importance['Importance'].abs()
+feature_importance = feature_importance.sort_values(by='Absolute Importance', ascending=False)
+
+print("Feature Importance:")
+print(feature_importance[['Feature', 'Importance']])
+
+# Plotting the feature importance
+plt.figure(figsize=(10, 6))
+plt.barh(feature_importance['Feature'], feature_importance['Importance'], color='skyblue')
+plt.xlabel('Coefficient Value')
+plt.ylabel('Feature')
+plt.title('Feature Importance')
+plt.gca().invert_yaxis()  # Invert y-axis to have the highest importance at the top
+plt.show()
+```
+
+The output: 
+
+
+<img width="1115" alt="Screen Shot 2024-07-30 at 7 33 46 PM" src="https://github.com/user-attachments/assets/1cb1bbf8-fc25-4ff7-ab9d-de8903d5f170">
+
+According to the output, the most influential feature is 'activity_count_squared', with the highest positive coefficient (8.63e-04), followed by 'days_since_signup' (1.63e-04) and 'age_squared' (-1.60e-04). Note that 'age_squared' has a negative impact. The remaining features have relatively smaller coefficients, indicating less influence on the predictions. Features such as 'activity_count' and 'session_count' have coefficients close to zero, suggesting minimal impact on the subscription status. Interestingly, some coefficients appear to be zero or near-zero, which is unusual for ridge regression. This could be due to very strong regularization applied by the model. Let's look at the last regularization method: Elastic Net, which is the combination of ridge and lasso regression. 
+
+**3. Elastic net regression** 
+
+Note that in the code below, I use 'saga' instead of 'liblinear' as the method supports elastic net. I also set l1_ratios parameter, which specifies the mix of L1 and L2 regularization, to be 0.5. The number reflects an equal mix of L1 and L2 regularization. 
+
+```ruby
+
+```
+
+
+
+
+
+You can adjust this ratio based on your preference or use multiple values to let the model select the best one during cross-validation.
+
+
+```ruby
+
+```
 
 STOP here: What next is to 1) adjust class imbalance 2) run logistic with regularization and 3) dont forget that you will have to use the evaluation matrix specific for binary outcomes such as acuracy predision recall 4) read the ML bppls
 
