@@ -197,7 +197,7 @@ In the real world, we do not always have projects where the outcome is balanced 
 
 ## Example
 
-Let's take a look at a real-world example. The dataset I use today discusses subscription to a streaming service. The variables are:
+Let's take a look at a real-world example. The dataset I use today discusses subscription to a streaming service among Asian Americans. This fictional streaming company cares about detecting all potential customers who may subscribe to their service and wants to reach out to as many of them as possible to boost sales rates. The variables are:
 
 * **user_id**: A unique identifier for each user.
 * **days_since_signup**: The number of days since the user signed up for the streaming service.
@@ -347,7 +347,7 @@ from scipy.stats import chi2
 
 
 # Features for the model without polynomial terms
-features_model = ['days_since_signup', 'age', 'payment_activity', 'login_activity', 'content_view_activity',
+features_model = ['days_since_signup', 'age', 'payment_activity', 'login_activity', 
                   'app_update_activity', 'customer_service_activity', 'account_change_activity', 'error_report_activity',
                   'content_download_activity', 'other_activity', 'account_issue_history', 'unsubscribe_reason_email',
                   'unsubscribe_reason_ad', 'unsubscribe_reason_content', 'unsubscribe_reason_ui', 'unsubscribe_reason_login',
@@ -385,7 +385,9 @@ print(f"Likelihood Ratio Test Statistic: {lr_stat}, p-value: {p_value_lr}")
 ```
 
 Here is the output: 
-<img width="678" alt="Screen Shot 2024-07-29 at 2 24 03 PM" src="https://github.com/user-attachments/assets/ce061b74-9aa8-4cde-a1d6-ef7cffe5cc98">
+
+<img width="672" alt="Screen Shot 2024-07-30 at 10 18 52 AM" src="https://github.com/user-attachments/assets/6fffdb4e-6923-47a2-b7a2-2172735907f8">
+
 
 
 The model with polynomial terms has lower AIC and BIC values compared to the model without polynomial terms, suggesting that it provides a better fit to the data despite its additional complexity. Additionally, the p-value is extremely small (3.29×10⁻⁹), indicating strong evidence that the model with polynomial terms fits the data significantly better than the model without polynomial terms.
@@ -440,6 +442,133 @@ The output:
 
 According to the output, the distribution of the predicted probabilities is not random and forms a specific shape, indicating that the homoscedasticity assumption is not met. What we should do is apply transformations or consider different modeling techniques to address this issue. However, for simplicity in this demonstration, I will skip these steps and continue with the machine learning process.
 
+### Machine Learning 
+
+Now that we have prepared the data, let's begin by finding the best method to deal with class imbalance first. In this dataset, we have a pretty severe class imbalance as only 739 customers actually subscribe to the service, while 22,834 participants do not. We should always deal with class imbalance first before performing any regularization techniques to ensure that the model accurately learns from both classes and doesn't become biased towards the majority class (i.e., people who do not subscribe to the service in the current example). Let's begin with the baseline model without any class imbalance adjustment first.
+
+
+**1. Baseline model**
+```ruby
+#1. Logistic regression baseline
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, roc_auc_score
+from sklearn.model_selection import train_test_split
+
+# Assuming X and y are your feature matrix and target variable respectively
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_poly, y, test_size=0.2, random_state=42)
+
+# Fit logistic regression without any class imbalance adjustment
+log_reg_baseline = LogisticRegression(max_iter=10000, random_state=42)
+log_reg_baseline.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred_baseline = log_reg_baseline.predict(X_test)
+print("Baseline Logistic Regression (without SMOTE)")
+print(classification_report(y_test, y_pred_baseline))
+print("AUC:", roc_auc_score(y_test, y_pred_baseline))
+```
+The output: 
+
+<img width="472" alt="Screen Shot 2024-07-30 at 10 34 21 AM" src="https://github.com/user-attachments/assets/c032515b-0f93-46ea-9a15-aab830ef1c63">
+
+The recall for the minority class (subscribers) is only 1%, which is not surprising given the severe class imbalance, with the ratio of majority to minority class approximately 30:1. This recall indicates that the model correctly identifies only 1% of the actual subscribers. Among those predicted as subscribers, 20% are correct predictions (i.e., precision).
+
+Note that while the overall accuracy is quite high at 97%, this does not guarantee that the model performs well in predicting the minority class. The high accuracy is driven by the high recall and precision for predicting non-subscribers (i.e., the majority class), which is not our primary group of interest. The area under the curve (AUC) is 50%, indicating that the model has a limited ability to distinguish between subscribers and non-subscribers.
+
+**2. SMOTE**
+
+```ruby
+#2. Simple logistic regression with SMOTE 
+
+from imblearn.over_sampling import SMOTE
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_poly, y, test_size=0.2, random_state=42)
+
+# Apply SMOTE to the training data
+smote = SMOTE(random_state=42)
+X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
+
+# Fit logistic regression
+log_reg = LogisticRegression(max_iter=10000, random_state=42)
+log_reg.fit(X_train_smote, y_train_smote)
+
+# Predict and evaluate
+y_pred = log_reg.predict(X_test)
+print(classification_report(y_test, y_pred))
+print("AUC:", roc_auc_score(y_test, y_pred))
+
+```
+The output: 
+
+<img width="469" alt="Screen Shot 2024-07-30 at 10 21 59 AM" src="https://github.com/user-attachments/assets/f4611243-b14b-41f1-941e-75c03a24da2e">
+
+According to the output from the SMOTE class imbalance adjustment, the recall for the minority class (subscribers) is 30%, indicating that the model correctly identifies 30% of the actual subscribers. This percentage is much better than the baseline model, where I did not create synthetic minority classes. Among those predicted as subscribers, only 6% are correct predictions (i.e., precision). Note that the precision has significantly dropped from the baseline model (20%). This is because the model is now more likely to predict subscribers, increasing the number of false positives.
+
+Like the baseline model, the overall accuracy of the SMOTE model is quite high at 85%. However, this does not guarantee that the model performs well in predicting the minority class. The high accuracy is driven by the high recall and precision for predicting non-subscribers (i.e., the majority class). The area under the curve (AUC) is 58%, indicating that the model still has a limited ability to distinguish between subscribers and non-subscribers.
+      
+**3. Logistic regression with class weight adjustment**
+
+In the code below, the class_weight='balanced' parameter automatically adjusts the weights inversely proportional to class frequencies in the input data to help the model pay more attention to the minority class during training. You may have a question: Are the weights applied to the majority or minority class? The answer is they are applied to both classes but with different magnitudes. For the minority class, the weight is higher to compensate for its underrepresentation. For the majority class, the weight is lower to avoid the model being biased towards it. The goal is to balance the influence of both classes on the model training process. You can manually adjust the weight for each class or you can just set the class_weight = 'balanced' as I did below to let the algorithm automatically calculate the class weights inversely proportional to the class frequencies using the formula: 
+
+<img width="140" alt="Screen Shot 2024-07-30 at 10 54 04 AM" src="https://github.com/user-attachments/assets/160196cf-8836-44f9-b025-9267470ebbd6">
+
+* *n* is the total number of samples.
+* *k* is the number of classes.
+* *n<sub>i</sub>* is the number of samples *n* class *i*.
+
+```ruby
+#3 logistic regression with class weight adjustment
+log_reg_weighted = LogisticRegression(class_weight='balanced', max_iter=10000, random_state=42)
+log_reg_weighted.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred_weighted = log_reg_weighted.predict(X_test)
+print("Weighted Logistic Regression")
+print(classification_report(y_test, y_pred_weighted))
+print("AUC:", roc_auc_score(y_test, y_pred_weighted))
+```
+The output: 
+<img width="473" alt="Screen Shot 2024-07-30 at 10 56 28 AM" src="https://github.com/user-attachments/assets/b1fec721-0307-4be0-a4a6-e0d191be7ddf">
+
+ Recall for the minority class (subscribers) is 74%, which means the model correctly identifies 74% of the actual subscribers. This is a significant improvement over both the SMOTE technique and the baseline model. However,precision for the minority class is only 8%, indicating that among the predicted subscribers, merely 8% are actually correct. This low precision is because the model, while being effective at identifying subscribers, also incorrectly classifies many non-subscribers as subscribers, resulting in a high number of false positives. Overall accuracy is 77%, which is lower than the baseline model but more balanced in terms of performance across both classes. AUC is 75%, indicating that the model has a reasonable ability to distinguish between subscribers and non-subscribers, suggesting a better overall performance than the baseline and SMOTE models. 
+
+While the precision is low, the recall is quite high, which means the model is effective at identifying potential subscribers. As mentioned earlier, this fictional streaming company cares more about detecting all potential customers who may subscribe to the service and wants to reach out to as many of them as possible to boost sales rates, the current recall rate may be satisfactory enough. We can boost the precision by adjusting the decision threshold (using a value other than the default 0.5) as discussed in [my previous post](https://github.com/KayChansiri/Demo_Performance_Metrics). However, given the company's goal to maximize recall, the current approach is appropriate.
+
+
+**4. Logistic regression with undersampling**
+For this method, we will try undersampling the majority class. In the code below, the ratio of undersampling is determined by how you configure the RandomUnderSampler. By default, the RandomUnderSampler will balance the minority and majority classes to have the same number of instances (1:1). However, you can specify the desired ratio by using the sampling_strategy parameter.
+
+The ratio that you specify should also reflect the true population's distribution. From my quick search on Perplexity, as of January 2024, streaming made up 45.4% of Asian Americans' TV usage, compared to 36.0% for the general U.S. population. Based on this information, we will set the ratio for undersampling to reflect a similar distribution. If we assume the minority class represents the subscribers among Asian Americans and the majority class represents the non-subscribers, we might set a ratio close to this distribution. For simplicity, let's assume a custom ratio of approximately 45.4% subscribers to 54.6% non-subscribers, which translates to a 0.83 ratio (45.4/54.6).
+
+```ruby
+#4 undersampling
+from imblearn.under_sampling import RandomUnderSampler
+
+
+# Apply undersampling to the training data with a custom ratio (0.83:1)
+undersampler = RandomUnderSampler(sampling_strategy=0.83, random_state=42)
+X_train_under, y_train_under = undersampler.fit_resample(X_train, y_train)
+
+# Fit logistic regression
+log_reg_under = LogisticRegression(max_iter=1000, random_state=42)
+log_reg_under.fit(X_train_under, y_train_under)
+
+# Predict and evaluate
+y_pred_under = log_reg_under.predict(X_test)
+print("Undersampling Logistic Regression (0.83:1 ratio)")
+print(classification_report(y_test, y_pred_under))
+print("AUC:", roc_auc_score(y_test, y_pred_under))
+```
+The output:
+<img width="473" alt="Screen Shot 2024-07-30 at 10 56 28 AM" src="https://github.com/user-attachments/assets/57a6e2b5-3c16-4913-a13e-5d4f409c0971">
+
+The undersampling approach (0.83:1 ratio) achieves a better recall for the minority class (56%) compared to the baseline and SMOTE models. However, the recall rate is lower than that of the class weight adjustment model. The precision (7%) is also low, but since this metric is not of the company's primary interest, we will ignore it for now. The AUC of 67% indicates that the model has a reasonable discriminative ability, but there is room for improvement.
+
+Among all the methods I have tried, the class weight adjustment is the best at achieving the highest recall. Thus, we will proceed with using this method for the next step: regularization.
 
 
 STOP here: What next is to 1) adjust class imbalance 2) run logistic with regularization and 3) dont forget that you will have to use the evaluation matrix specific for binary outcomes such as acuracy predision recall 4) read the ML bppls
