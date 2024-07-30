@@ -1,6 +1,6 @@
 # Logistic Regression, Sigmoid Function, the Concept of Likelihood Estimation, and More
 
-In my previous post, I discussed linear regression from a machine learning (ML) perspective. Today, let’s delve into a different type of regression used to predict binary outcomes — logistic regression.
+In my previous post, I discussed linear regression from a machine learning (ML) perspective. Today, let’s delve into a different type of regression used to predict binary outcomes — logistic regression. In this post, I will also discuss important concepts relevant to the algorithm, such as the sigmoid function, log-likelihood estimation, class imbalance adjustment, and more. If you are ready, let's get started!
 
 ## Why Logistic Regression?
 
@@ -732,30 +732,6 @@ The output:
 
 <img width="1115" alt="Screen Shot 2024-07-30 at 7 33 46 PM" src="https://github.com/user-attachments/assets/1cb1bbf8-fc25-4ff7-ab9d-de8903d5f170">
 
-According to the output, the most influential feature is 'activity_count_squared', with the highest positive coefficient (8.63e-04), followed by 'days_since_signup' (1.63e-04) and 'age_squared' (-1.60e-04). Note that 'age_squared' has a negative impact. The remaining features have relatively smaller coefficients, indicating less influence on the predictions. Features such as 'activity_count' and 'session_count' have coefficients close to zero, suggesting minimal impact on the subscription status. Interestingly, some coefficients appear to be zero or near-zero, which is unusual for ridge regression. This could be due to very strong regularization applied by the model. Let's look at the last regularization method: Elastic Net, which is the combination of ridge and lasso regression. 
+According to the output, the most influential feature is 'activity_count_squared', with the highest positive coefficient (8.63e-04), followed by 'days_since_signup' (1.63e-04) and 'age_squared' (-1.60e-04). Note that 'age_squared' has a negative impact. The remaining features have relatively smaller coefficients, indicating less influence on the predictions. Features such as 'activity_count' and 'session_count' have coefficients close to zero, suggesting minimal impact on the subscription status. Interestingly, some coefficients appear to be zero or near-zero, which is unusual for ridge regression. This could be due to very strong regularization applied by the model. 
 
-**3. Elastic net regression** 
-
-Note that in the code below, I use 'saga' instead of 'liblinear' as the method supports elastic net. I also set l1_ratios parameter, which specifies the mix of L1 and L2 regularization, to be 0.5. The number reflects an equal mix of L1 and L2 regularization. 
-
-```ruby
-
-```
-
-
-
-
-
-You can adjust this ratio based on your preference or use multiple values to let the model select the best one during cross-validation.
-
-
-```ruby
-
-```
-
-STOP here: What next is to 1) adjust class imbalance 2) run logistic with regularization and 3) dont forget that you will have to use the evaluation matrix specific for binary outcomes such as acuracy predision recall 4) read the ML bppls
-
-
-```ruby
-
-```
+In conclusion, the best model we obtained today is the Lasso regression with class weight adjustment. I hope this post has been helpful for you in understanding the foundational concepts of logistic regression from a machine learning perspective. Stay tuned for the next post, where I will discuss Gradient Boosting and AdaBoost, two of the most effective algorithms for boosting model performance.
