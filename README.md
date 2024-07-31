@@ -534,6 +534,7 @@ print(classification_report(y_test, y_pred_weighted))
 print("AUC:", roc_auc_score(y_test, y_pred_weighted))
 ```
 The output: 
+
 <img width="473" alt="Screen Shot 2024-07-30 at 10 56 28 AM" src="https://github.com/user-attachments/assets/b1fec721-0307-4be0-a4a6-e0d191be7ddf">
 
  Recall for the minority class (subscribers) is 74%, which means the model correctly identifies 74% of the actual subscribers. This is a significant improvement over both the SMOTE technique and the baseline model. However,precision for the minority class is only 8%, indicating that among the predicted subscribers, merely 8% are actually correct. This low precision is because the model, while being effective at identifying subscribers, also incorrectly classifies many non-subscribers as subscribers, resulting in a high number of false positives. Overall accuracy is 77%, which is lower than the baseline model but more balanced in terms of performance across both classes. AUC is 75%, indicating that the model has a reasonable ability to distinguish between subscribers and non-subscribers, suggesting a better overall performance than the baseline and SMOTE models. 
@@ -542,6 +543,7 @@ While the precision is low, the recall is quite high, which means the model is e
 
 
 **4. Logistic regression with undersampling**
+
 For this method, we will try undersampling the majority class. In the code below, the ratio of undersampling is determined by how you configure the RandomUnderSampler. By default, the RandomUnderSampler will balance the minority and majority classes to have the same number of instances (1:1). However, you can specify the desired ratio by using the sampling_strategy parameter.
 
 The ratio that you specify should also reflect the true population's distribution. From my quick search on Perplexity, as of January 2024, streaming made up 45.4% of Asian Americans' TV usage, compared to 36.0% for the general U.S. population. Based on this information, we will set the ratio for undersampling to reflect a similar distribution. If we assume the minority class represents the subscribers among Asian Americans and the majority class represents the non-subscribers, we might set a ratio close to this distribution. For simplicity, let's assume a custom ratio of approximately 45.4% subscribers to 54.6% non-subscribers, which translates to a 0.83 ratio (45.4/54.6).
