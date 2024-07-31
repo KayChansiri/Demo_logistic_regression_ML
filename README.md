@@ -43,7 +43,9 @@ Let’s take a look at an example. Say you want to predict the probability of a 
 The linear regression function X can be represented as:
 
 X = B<sub>0</sub>+ B<sub>1</sub>⋅Age
+
 x= −3 + 0.1⋅25
+
 x= −0.5
 
 Now, plug this value into the sigmoid function:
