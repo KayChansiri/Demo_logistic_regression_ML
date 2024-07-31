@@ -148,7 +148,7 @@ For instance, say each customer has a different probability as shown in the data
 In this table:
 * Age is the predictor variable *X*.
 * Subscription (Y) indicates whether the customer subscribed (1) or not (0).
-* Probability (P) is calculated using the logistic regression model with the initial coefficients B<sub>0</sub>0=−0.3 and  B<sub>1</sub>0 = 0.1
+* Probability (P) is calculated using the logistic regression model with the initial coefficients B<sub>0</sub> =−0.3 and  B<sub>1</sub> = 0.1
 
 You can calculate these probabilities using the logistic regression equation:
 
