@@ -139,7 +139,7 @@ Now that you have learned about the concept of MLE, let’s see how we can apply
 
 <img width="321" alt="Screen Shot 2024-07-25 at 1 56 57 PM" src="https://github.com/user-attachments/assets/ede755ea-a32a-4449-aece-242a5bbba38c">
 
-Imagine that at first, we have a random set of coefficients B<sub>0</sub>0=−0.3 and  B<sub>1</sub>0 = 0.1 as discussed previously. When we plug in the values and each *X* into the equation above, we get the logit for every observation. Note that unlike the example above, where I simply said that the probability of an Asian customer subscribing to the streaming service is 0.8, in reality, each sample should have a different *X* (such as age) and therefore should have a different probability.
+Imagine that at first, we have a random set of coefficients B<sub>0</sub>=−0.3 and  B<sub>1</sub> = 0.1 as discussed previously. When we plug in the values and each *X* into the equation above, we get the logit for every observation. Note that unlike the example above, where I simply said that the probability of an Asian customer subscribing to the streaming service is 0.8, in reality, each sample should have a different *X* (such as age) and therefore should have a different probability.
 
 For instance, say each customer has a different probability as shown in the data table below:
 
