@@ -741,3 +741,5 @@ The output:
 According to the output, the most influential feature is 'activity_count_squared', with the highest positive coefficient (8.63e-04), followed by 'days_since_signup' (1.63e-04) and 'age_squared' (-1.60e-04). Note that 'age_squared' has a negative impact. The remaining features have relatively smaller coefficients, indicating less influence on the predictions. Features such as 'activity_count' and 'session_count' have coefficients close to zero, suggesting minimal impact on the subscription status. Interestingly, some coefficients appear to be zero or near-zero, which is unusual for ridge regression. This could be due to very strong regularization applied by the model. 
 
 In conclusion, the best model we obtained today is the Lasso regression with class weight adjustment. I hope this post has been helpful for you in understanding the foundational concepts of logistic regression from a machine learning perspective. Stay tuned for the next post, where I will discuss Gradient Boosting and AdaBoost, two of the most effective algorithms for boosting model performance.
+
+See LinkedIn_Demo_Logistic_Regression.ipynb for the full code. 
