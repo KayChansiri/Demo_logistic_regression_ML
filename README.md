@@ -578,6 +578,7 @@ Among all the methods I have tried, the class weight adjustment is the best at a
 ### Regularization 
 
 **1. Lasso regression** 
+
 If you are not familiar with different types of regularization, refer back to my [previous post](https://github.com/KayChansiri/Demo_Linear_Regression_ML). The first method that I use here is lasso, which forces certain high coefficients to be exactly zero. In the code below, I use lasso, along with class weight adjustment to deal with class imbalance. I also use cross-validation with five folds. In each fold, the model tests multiple values of C (inverse of lambda) to find the best regularization strength. The Cs=10 parameter in the code below means 10 different values of C are tested for each cross-validation, and the same set of 10 C values is tested across all folds. By setting Cs=10, the algorithm will automatically select 10 values for C logarithmically spaced between a very small value (like 1e−4) and a very large value (like 1e4 or higher). You can also customize the values for C instead of using the default logarithmic spacing by using the code:
 
 ```ruby
@@ -656,6 +657,7 @@ plt.show()
 ```
 
 The output: 
+
 
 <img width="1079" alt="Screen Shot 2024-07-30 at 7 07 08 PM" src="https://github.com/user-attachments/assets/fe7c8526-34da-44b5-9f2d-4753130ce510">
 
